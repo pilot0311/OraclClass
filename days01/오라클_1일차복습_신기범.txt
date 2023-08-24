@@ -1,0 +1,94 @@
+1. SQL 이란 ? 
+1-2. SQL의 5가지 종류 
+   ㄱ.  DML 조작 : insert, update, delete, rename, truncate
+   ㄴ.  DCL 권한 : GRANT, REVOKE
+   ㄷ.  DDL 정의 : CREATE, DROP, ALTER
+   ㄹ.  DQL 조회 : SELECT
+   ㅁ.  TCL 트랜잭션 : COMMIT, ROLLBACK, SAVEPOINT
+
+2. PL/SQL 이란 ? 
+ Procedural Language + SQL 로 절차적인 언어 문법
+3. RDBMS 란 ? 
+    1) DATA 유/무형의 의미있는 모든 정보
+    2) DATABASE 정보들의 집합
+    3) DBMS DB를 관리하는 소프트웨어
+    4) R + DBMS 관계형 데이터베이스로 데이터간 관계에 초점을 둔 모델
+    
+4. SQL을 작성하세요. ( SCOTT 사용자 접속 후 )
+   ㄱ. 현재 접속한 사용자 정보 조회 
+	SHOW USER;
+   ㄴ. 모든 사용자 정보를 조회하는 SQL을 작성하세요.
+	SELECT * FROM all_users;
+   ㄷ. 현재 접속한 사용자가 소유한 테이블 정보 조회
+	SELECT * FROM tabs;
+   ㄹ. hong/1234 계정 생성
+	CREATE USER hong IDNEFIED BY 1234;
+   ㅁ. hong 권한 부여
+	GRANT CONNECT, RESOURCE TO hong;
+   ㅂ. hong 부여한 권한 제거
+	REVOKE CONNECT, RESOURCE FROM hong
+   ㅅ. hong 계정 삭제
+    	DROP USER hong;
+5. DBA 란 ? 
+데이터베이스 관리자 SYS와 SYSTEM이 DBA로 기본 생성
+[ 용어 구분]
+오라클 서버
+오라클 데이터베이스 : 전역 데이터베이스 이름 XE
+오라클 인스턴스       : SID XE
+
+6. SID 란 ?  시스템 식별자
+6-2. 전역 데이터베이스 이름 이란?      데이터베이스를 식별하기위한 유일한 값
+
+7. "데이터 모델"이란 ?  
+
+8. 관계형 데이터 모델의 핵심 구성 요소 
+  ㄱ. 개체 정보를 저장 하는 가장작은 단위 == 테이블
+  ㄴ. 속성  개체들의 특징
+  ㄷ.  관계 개체와 개체간의 연관
+  
+9. 테이블 ( table )?  
+  정보를 저장 하는 가장작은 단위
+9-2. 테이블 스페이스 ?   
+정보를 저장 하는 가장큰 단위
+10. 단축키를 적으세요.
+  ㄱ. SQL 작성 후 실행하는 방법    :
+      (1)  CTRL + ENTER
+      (2)  실행할 명령문 블럭후 실행
+
+  ㄴ. 주석 처리하는 방법           :  -- / REM
+
+11. 오라클 삭제하는 순서를 적으세요. 
+   ㄱ.  서비스 -> 실행중인 오라클 서비스 중지 
+   ㄴ.  프로그램 추가 제거 -> 오라클 삭제
+   ㄷ.  오라클 설치 폴더 삭제
+   ㄹ.  오라클 레지스트리 삭제
+
+12. Sqlplus.exe 를  사용해서 
+
+   ㄱ. sys 계정으로 로그인하고       sqlplus / as sysdba;      sqlplus sys/ss123$ as sysdba:  
+   ㄴ. 로그인한 계정을 확인하고     SHOW USER;
+   ㄷ. 모든 사용자 계정 조회하고    SELECT * FROM all_users;
+   ㄹ. 연결종료하는 코딩을 하세요.	EXIT
+
+13. tnsname.ora 파일의 용도를 설명하세요. 
+    
+14.  오라클 설치 후 주요 오라클 서비스 2가지       ***  
+  ㄱ.  SQLPLUS
+  ㄴ.   SQLDEVELOPER
+
+15. SQL은 기본 [ (1)   ] , [ (2) ) ]을 대상으로 수행된다.    
+테이블 뷰
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    
+      

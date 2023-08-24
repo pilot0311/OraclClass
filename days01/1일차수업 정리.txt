@@ -1,0 +1,188 @@
+1. 폴더생성
+OracleClass 폴더생성
+       ㄴ days01 폴더
+
+2. Ora_Help.zip - c드라이브에 앞축 풀기
+ora_help.exe 관리자권한 실행
+
+3. 용어
+  1) 데이터(Data)
+	넓은 의미에서 데이터는 의미 있는 정보를 가진 모든 값,
+	사람이나 자동 기기가 생성 또는 처리하는 형태로 표시된 것
+
+	어떠한 사실, 개념, 명령 또는 과학적인 실험이나 관측 결과로 얻은 
+	수치나 정상적인 값 등 실체의 속성을 숫자, 문자, 기호 등으로 표현한 
+	것이며 데이터에 특정한 의미가 부여될 때 정보가 된다.
+  2) 데이터베이스(DataBase == DB)
+	ㄱ. 공유되어 사용될 목적으로 통합 관리되는 데이터의 집합
+	ㄴ. Data(자료) + Base(저장소)
+	ㄷ. 효과적으로 추출, 분류, 저장 등등
+	ㄹ. 현실 세계에 존재하는 유형, 무형 등 방대한 정보 집합
+  3) DBMS ([D]ata[B]ase + [M]anagement [S]ystem) 데이터베이스 관리 시스템
+	ㄱ. 소프트웨어
+	ㄴ. [Oracle], [MySQL], MS SQL 등등
+	ㄹ. Oracle 11g XE 설치
+		SYS, SYSTEM DBA(관리자) 계정 : ss123$
+	    - https://www.oracle.com/ - 19c - 21cXE window
+	Oracle 11g XE = https://www.oracle.com/database/technologies/xe-prior-release-downloads.html	
+	    - 오라클 종류(edition): EE, SE, SEO, XE(Express), PE
+	    - 11g == grid
+	    - 21c == cloud
+	    - 9i   == internet
+	ㅁ. SQL Developer 23.1 (https://www.oracle.com/database/sqldeveloper/technologies/download/)
+		Windows 64-bit with JDK 11 included 다운
+	
+	ㅂ. 설명서
+ 	     https://docs.oracle.com/cd/E17781_01/index.htm
+
+4. Oracle 11g XE 설치 확인
+	- C:\oraclexe 폴더 생성확인
+	- 제어판 - 시스템 및 보안 - 관리도구 - 서비스
+	1) 서비스 - OracleServiceXE 상태확인 - 실행
+		  OracleService + SID(시스템식별자) XE
+	2) OracleServiceXETNSListener
+	    OracleService + SID + XETNSListener
+5. 오라클[서버]에 연결해서 관리하는 [클라이언트 도구]
+	- SQL Developer 23.1 (c드라이브에 압축풀기 - 바로가기 만들기)
+	- SQL*PLUS 툴
+	- 토드(Toad) 유료...
+	등등
+6. 데이터 모델: 컴퓨터에 데이터를 저장하는 방식을 정의해 놓은 개념 모델
+	- 데이터 모델의 종류 : 계층형, 네트워크형, [관계형], 객체지향적 데이터 모델 등등
+
+7. 관계형 데이터 모델 + DBMS = RDBMS
+	- 관계형: 데이터 간 관계에 초점을 둔 모델
+		데이터 저장소(테이블)과 테이블 간 관계에 초점을 둔 모델
+
+8. 관계형 데이터 모델의 핵심 구성 요소
+	1) 개체(entity) - 데이터를 저장하는 가장 작은 단위, RDBMS(table == 릴레이션)
+	2) 속성(attribute) - 개체의 특징, 종류, 상태,     칼럼(열)column
+	3) 관계(relationship) - 개체와 개체 간의 연관성
+
+	예) 부서의 정보를 저장할 개체(table):dept
+	     부서 개체가 가지고 있는 속성(column) (부서번호, 무서명, 부서장 등등)
+	사원 개체(table) : employee
+		가지고 있는 속성(column): 사원번호, 사업명, 입사일자...
+
+	한명의 사원은 반드시 하나의 부서에 소속이 된다
+	부서개체(table) --소속관계-- 사원개체(table) 연관성(관계)
+
+9. DBA = DB(DataBase) + A(Adminstrator)
+          == 데이터베이스 관리자
+	SYS	- 모든 권한 최고 DBA
+	SYSTEM	- DB 생성 X
+
+10. 테이블 스페이스(tablespace)
+	1) 테이블(table) - 데이터를 저장하는 가장 작은 단위
+		행(ROW) == 레코드
+	2) 논리적 단위: 데이터 블록 < 익스텐트 < 세그먼트 < 테이블스페이스
+	3) 데이터 저장하는 단위 중 가장 상위의 개념 : 테이블 스페이스
+
+11. SID(시스템식별자) == XE
+    전역 데이터베이스 이름 == XE
+    OracleXETNSListener - 네트워크를 통해서 클라이언트가 오라클 서버와 연결을 담당하는 관리 프로그램
+
+12. 오라클 삭제
+     1) 서비스 실행 - 오라클 관련 서비스 모두 중지
+     2) 메뉴 - uninstall, deinstall 클릭
+        프로그램 추가/삭제 - oracle 제거
+     3) C:\oraclexe 설치 폴더 삭제
+     4) 레지스트리 삭제 - 레지스트리 편집기 실행 (검색 ㄱ 4군데 삭제)
+
+13. 클라이언트(본인pc) 도구 --연결 --> 오라클 서버(팀장pc)
+     1) 1521 포트 방화벽 해제
+     2) cmd - sqlplus /?
+         ㄱ. SQL 실행
+         ㄴ. PL/SQL 실행
+         ㄷ. SQL*Plus 명령어 실행
+
+	[사용형식]
+	sqlplus [ [<option>] [{logon | /nolog}] [<start>] ]
+	
+	 <logon> is: {<username>[/<password>][@<connect_identifier>] | / }
+              [AS {SYSDBA | SYSOPER | SYSASM}] [EDITION=value]
+	<connect_identifier>
+	@[<net_service_name> | [//]Host[:Port]/<service_name>]
+
+	sample :  sqlplus myusername/mypassword@ORCL
+
+//[시험?]
+	show user
+	SELECT * FROM all_USERS;
+	sqlplus sys/ss123$ as sysdba
+	sqlplus / as sysdba
+
+14. SQL Developer 23.1
+     SELECT * FROM all_USERS;
+
+15. SQL ?
+     클라이언트 도구 --> DB 서버
+                        질의  테이블(table) == 릴레이션
+     Structured	구조화된
+     Query	질의 
+     Language 	언어
+
+16. PL/SQL = PL(Procedural Language) + SQL
+	        절차적인 언어 문법
+
+17. SQL 종류 
+      1) DQL (Data Query Language) : 	조회		SELECT
+      2) DDL (Data Definition Language) : 정의		CREATE, DROP, ALTER
+      3) DML (Data Manupulation Language) : 조작	INSERT, UPDATE, DELET, RENAME, TRUNCATE
+	COMMIT(처리), ROLLBACK(되돌리기) 중 하나 해야함
+      4) DCL (Data Control Language) : 권한		GRANT, REVOKE
+      5) TCL (Transcation Control Language) : 트랜잭션	COMMIT, ROLLBACK, SAVEPOINT
+
+18. SQL 문장 작성법
+     SQL 문장은 대소문자를 구별하지 않는다
+     SQL*Plus에서 SQL문장은 SQL프롬프트에 입력되며, 이후의 Line은 줄번호가 붙는다
+     SQL명령을 종료할 때는 세미콜론(;)을 반드시 붙여야 한다
+     맨 마지막 명령어 1개가 SQL Buffer에 저장된다
+     SQL문장은 한줄 이상일 수 있다
+     SQL명령어를 구성하고 있는 단어중 어디에서나 분리해도 된다
+     한개의 line에 한개의 절(SELECT, FROM, WHERE)형태로 나누어 입력하는 것을 권한다
+     그러나 한 개의 단어를 두 줄로 나누어 입력해서는 안된다.
+     keyword는 대문자로 입력 권함
+     다른 단어 즉 table 이름 column이름은 소문자로 입력 권함
+     keyword는 단축하거나 줄로 나누어 쓸 수 없다
+     절은 대개 줄을 나누어 쓰도록 권함
+     탭과 줄 넣기는 가독성을 위해 권함
+
+19. 계정 생성(DDL - CREATE)
+     1) 관리자 계정으로 접속(SYS, SYSTEM)
+	scott 계정
+	tiger 비밀번호
+
+20. scott 생성된 게정으로 접속
+	sqlplus scott/tiger
+	ERROR:
+	ORA-01045: user SCOTT lacks CREATE SESSION privilege; logon denied
+	CREATE SESSION 권한이 없음
+	해결방법: 
+	1) 권한을 부여할 수 있는 계정(SYS)이 
+	2) CREATE SESSION 시스템권한 scott계정에 부여
+	    DB 접속(연결) 권한
+
+21. 권한(privilege) 설명
+    1) 권한 정의
+    2) 권한 부여 방법
+       1) DBA    ----->     scott(계정)
+       2) DBA    -->  롤(role)권한 --> scott(계정)
+
+22. 권한의 종류
+    1) 시스템 권한	:   사용자 권한
+    2) 객체 권한
+
+	【형식】 권한 DCL문
+     GRANT 시스템권한명 또는 롤명 TO 사용자명 또는 롤명 또는 PUBLIC
+        [WITH ADMIN OPTION];
+
+23. 권한 회수 : REVOKE 시스템권한명, 롤명 FROM 사용자명, 롤명, PUBLIC
+
+24. 계정 삭제
+	DROP USER scott;
+
+25. 데이터베이스 객체? 데이터베이스 내에 존재하는 논리적인 저장 구조
+    예) 테이블, 뷰, 인덱스, 시노님, 시퀀스, 함수, 프로시저, 트리거, 패키지 등등
+
+26. scott 계정 생성 -> Schema scott 생성: 모든 DB객체드의 묶음(집합) - [테이블 생성 + SQL문 연습], 인덱스, 뷰, 인덱스, 시노님, 시퀀스, 함수, 프로시저, 트리거, 패키지 등등
