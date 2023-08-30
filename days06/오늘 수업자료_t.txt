@@ -1,0 +1,622 @@
+[오늘 수업 자료]
+
+1. insa 테이블에서 각 부서별 사원수 조회
+
+-- 문제 1번 풀이
+1)
+SELECT *
+FROM insa;
+2) 7개의 부서 
+SELECT DISTINCT buseo
+FROM insa;
+3) UNION  
+SELECT '총무부', COUNT(*) FROM insa WHERE buseo = '총무부'
+UNION
+SELECT '개발부', COUNT(*) FROM insa WHERE buseo = '개발부';
+4) GROUP BY 절 
+-- ORA-00979: not a GROUP BY expression
+-- SELECT buseo, name,  COUNT(*)
+SELECT buseo, COUNT(*)
+FROM insa
+GROUP BY buseo; -- 집계 함수
+
+5) 상관서브쿼리
+-- 중복제거~ 
+SELECT DISTINCT buseo, ( SELECT COUNT(*) FROM insa s WHERE s.buseo = m.buseo  ) cnt 
+FROM insa m;
+
+-- 
+WITH m AS (
+SELECT DISTINCT buseo
+FROM insa 
+)
+SELECT buseo
+     , ( SELECT COUNT(*) FROM insa s WHERE s.buseo = m.buseo  ) cnt 
+FROM m;
+;
+11:02 수업시작~
+ [예제1] emp 테이블에서 각 부서별 사원수 조회.
+ [예제2] emp 테이블에서 급여(pay)의 등수(rank) 
+SELECT ename, sal+NVL(comm,0) pay 
+   , ( SELECT COUNT(*)+1 FROM emp WHERE sal+NVL(comm,0) > e.sal+NVL(e.comm,0)  ) pay_rank
+FROM emp e;
+
+-- 추가문제
+[문제] insa 테이블에서 남자사원수, 여자사원수 조회
+1) NULLIF(), NVL2()  1,0 -> '남자사원수', '여자사원수'
+   DECODE()
+-- SELECT MOD(SUBSTR(ssn,-7,1),2) ,  COUNT(*)
+SELECT DECODE( MOD(SUBSTR(ssn,-7,1),2), 1, '남자사원수', '여자사원수') ,  COUNT(*)
+FROM insa
+GROUP BY MOD(SUBSTR(ssn,-7,1),2);
+1-2)-- *****(기억)
+-- ORA-00923: FROM keyword not found where expected
+SELECT COUNT(*) "전체사원수"
+   , COUNT(DECODE( MOD(SUBSTR(ssn,-7,1),2), 1, '남자')) "남자사원수"
+   , COUNT(DECODE( MOD(SUBSTR(ssn,-7,1),2), 0, '여자')) "여자사원수"
+FROM insa;
+-- 풀이) COUNT(DECODE( MOD(SUBSTR(ssn,-7,1),2), 1, '남자사원수'))
+SELECT COUNT(comm), COUNT(sal), COUNT(mgr), COUNT(*)
+FROM emp;
+--
+SELECT SUM(comm), COUNT(comm), SUM(comm)/COUNT(comm), SUM(comm)/COUNT(*) 
+   , AVG( comm)
+FROM emp;
+--
+SELECT COUNT( DECODE( MOD(SUBSTR(ssn,-7,1),2), 1, 1000) )
+FROM insa;
+
+2) UNION
+SELECT '전체사원수', COUNT(*)
+FROM insa
+UNION
+SELECT '남자사원수', COUNT(*)
+FROM insa
+WHERE MOD(SUBSTR(ssn,-7,1),2)=1
+UNION
+SELECT '여자사원수', COUNT(*)
+FROM insa
+WHERE MOD(SUBSTR(ssn,-7,1),2)=0;
+ 
+-- [추가풀이] emp 테이블의 각 부서별 사원수 
+-- ORA-01789: query block has incorrect number of result columns
+SELECT deptno, COUNT(*) 
+FROM emp
+GROUP BY deptno
+UNION
+SELECT null, COUNT(*)
+FROM emp
+ORDER BY deptno;
+10   3
+20   3
+30   6
+40  0 (***)
+   12 
+    
+-- (문제제시) 사원이 존재하지 않는 40번 부서는 0으로 출력 X
+SELECT *
+FROM dept;
+
+-- ORA-00937: not a single-group group function
+SELECT 
+   COUNT(*)
+   , COUNT( DECODE( deptno, 10, 'O' ) ) "10번 사원수"
+   , COUNT( DECODE( deptno, 20, 'O' ) )  "20번 사원수"
+   , COUNT( DECODE( deptno, 30, 'O' ) )  "30번 사원수"
+   , COUNT( DECODE( deptno, 40, 'O' ) )  "40번 사원수"
+FROM emp;
+
+-- 피봇( pivot )기능
+  COUNT(*)    10번 사원수    20번 사원수    30번 사원수    40번 사원수
+---------- ---------- ---------- ---------- ----------
+        12          3          3          6          0
+        
+SELECT deptno
+FROM emp;
+
+20
+30
+30
+20
+30
+30
+10
+10
+30
+30
+20
+10
+
+2. insa 테이블에서 각 부서별 급여를 가장 많이 받는 사원의 pay를 출력
+     1) UNION ALL 사용해서 풀기
+     2) GROUP BY  사용해서 풀기
+     3) 상관 서브쿼리 사용해서 풀기
+-- 문제 풀이 2     12:05 수업 시작~ 
+1) UNION
+SELECT name, basicpay + sudang
+FROM insa
+WHERE buseo='총무부' 
+    AND
+    basicpay + sudang >= ALL( SELECT basicpay + sudang   
+                           FROM insa 
+                           WHERE  buseo='총무부');
+    basicpay + sudang >= ( SELECT MAX(basicpay + sudang) 
+                           FROM insa 
+                           WHERE  buseo='총무부');
+UNION
+-- 2)
+-- ORA-00979: not a GROUP BY expression
+SELECT buseo, MAX(basicpay + sudang)
+FROM insa
+GROUP BY buseo;
+
+-- 3) 상관서브쿼리               
+SELECT buseo, basicpay + sudang
+FROM insa m
+WHERE basicpay + sudang = ( SELECT MAX(basicpay + sudang) 
+                          FROM insa WHERE buseo = m.buseo);
+
+
+3. 이번 달이  몇 일까지 있는 지 출력하세요. 
+   해당 날짜의 마지막 날짜 : LAST_DAY()
+   마지막 날짜(일)        : TO_CHAR()  날짜-> 년,월,[일],시간,분,초
+                          EXTRACT()
+
+SELECT SYSDATE
+      , LAST_DAY( SYSDATE )
+      , TO_CHAR( LAST_DAY( SYSDATE ), 'DD' )
+      , EXTRACT( DAY FROM LAST_DAY( SYSDATE )) 
+FROM dual;
+
+4. 다음 주 월요일은 휴강일이다.. 몇 일인가요 ? 
+    NEXT_DAY()
+SELECT SYSDATE
+      , NEXT_DAY(SYSDATE, '월요일') 
+FROM dual;
+
+
+5. emp 테이블에서
+   각 사원들의 입사일자를 기준으로 10년 5개월 20일째 되는 날 ? 
+    [실행결과]
+        HIREDATE ADD_MONT
+        -------- --------
+        80/12/17 91/06/06
+        81/02/20 91/08/12
+        81/02/22 91/08/14
+        81/04/02 91/09/22
+        81/09/28 92/03/18
+        81/05/01 91/10/21
+        81/06/09 91/11/29
+        81/11/17 92/05/07
+        81/09/08 92/02/28
+        81/12/03 92/05/23
+        81/12/03 92/05/23 
+        82/01/23 92/07/12
+        
+        12개 행이 선택되었습니다.
+        
+SELECT ename, hiredate
+   , hiredate + 20  
+   , ADD_MONTHS(hiredate, 10*12 + 5) + 20  -- 10년 5개월 20일째
+FROM emp;
+   
+   날짜 - 날짜 = 일수
+   날짜 + 숫자 = 날짜
+   날짜 - 숫자 = 날짜
+   날짜 + 시간 = 날짜
+         숫자/24
+        
+
+        
+6.  insa테이블에서 1001, 1002 사원의 주민번호의 월/일 만 오늘 날짜로 수정하는 쿼리를 작성
+-- 1001   홍길동   98/10/11  98/08/30
+-- 1002   이순신   00/11/29  00/08/30
+SELECT num, name
+   , ibsadate
+   , TO_CHAR(ibsadate, 'YY')
+   , SUBSTR( ibsadate, 0, 2)
+FROM insa
+WHERE num IN (1001, 1002);
+
+-- TO_CHAR(), EXTRACT()
+SELECT SYSDATE
+      , TO_CHAR(SYSDATE, 'MM') 월  -- '08'
+      , TO_CHAR(SYSDATE, 'DD') 일  -- '30'
+FROM dual;
+
+-- 수정하는 쿼리 작성
+UPDATE insa
+-- SET ibsadate =  TO_CHAR(ibsadate, 'YY') || '/' || TO_CHAR(SYSDATE, 'MM') || '/' || TO_CHAR(SYSDATE, 'DD') --    '98/08/30'
+SET ssn = SUBSTR(ssn,0,2) || TO_CHAR(SYSDATE, 'MMDD') || SUBSTR(ssn,7)
+WHERE num IN (1001, 1002);
+COMMIT;
+
+
+6-2.  insa테이블에서 오늘('2023.08.30')을 기준으로 아래와 같이 출력하는 쿼리 작성.  
+   ( DECODE 함수 사용. )
+    결과)
+    장인철   780506-1625148   생일 후
+    김영년   821011-2362514   생일 전
+    나윤균   810810-1552147   생일 후
+    김종서   751010-1122233   오늘 생일
+    유관순   801010-2987897   오늘 생일
+    정한국   760909-1333333   생일 후
+    
+UPDATE insa
+-- SET ibsadate =  TO_CHAR(ibsadate, 'YY') || '/' || TO_CHAR(SYSDATE, 'MM') || '/' || TO_CHAR(SYSDATE, 'DD') --    '98/08/30'
+SET ssn = SUBSTR(ssn,0,2) || TO_CHAR(SYSDATE, 'MMDD') || SUBSTR(ssn,7)
+WHERE num IN (1001, 1002);
+COMMIT;
+ROLLBACK;
+
+SELECT num, name, ssn
+ -- , 오늘날짜월일0830 -   생일월일             양수(생일 후)   0(오늘)   음수(생일 전)
+ --    , SUBSTR(ssn, 3,4)  b_md
+ --   , TO_CHAR(SYSDATE, 'MMDD') t_md
+ --   , TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4)
+    , SIGN(TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4))  s
+    , DECODE( SIGN(TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4))
+              , -1, '생일 전', 1, '생일 후', '오늘 생일'  )  d
+FROM insa;
+--    -1( 생일 지나지 않은 것)  0(오늘 생일)  1( 생일 지난 것)    
+
+SELECT num, name, ssn 
+    ,  TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4)  
+    , CASE
+        WHEN (TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4)) > 0 THEN '생일 후'
+        WHEN (TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4)) < 0 THEN '생일 전'
+        ELSE '오늘 생일'
+      END 
+FROM insa;
+    
+    
+6-3. insa테이블에서 오늘('2023.08.30')기준으로 이 날이 생일인 사원수,지난 사원수, 안 지난 사원수를 출력하는 쿼리 작성. 
+[실행결과 예]
+  생일 전 사원수   생일 후 사원수  오늘 생일 사원수
+---------- ---------- ----------
+        48         12          2    
+ WITH temp AS (
+    SELECT num, name, ssn 
+        , SIGN(TO_CHAR(SYSDATE, 'MMDD')  - SUBSTR(ssn, 3,4))  s 
+    FROM insa
+)
+SELECT    COUNT( DECODE( s , -1, 'O' ) ) "생일 전 사원수"
+        , COUNT( DECODE( s , 1, 'O' ) ) "생일 후 사원수"
+        , COUNT( DECODE( s , 0, 'O' ) ) "오늘 생일 사원수"
+        , COUNT(*) "전체 사원수"
+FROM temp;
+        
+7. 함수 설명
+    7-1. NULLIF() 함수 설명
+    7-2. COALESCE() 함수 설명  
+    7-3. DECODE() 함수 설명    
+    7-4.            LAST_DAY() 함수 설명
+    7-5. ADD_MONTHS() 함수 설명
+    7-6. MONTHS_BETWEEN() 함수 설명
+    7-7.            NEXT_DAY() 함수 설명
+    7-8. EXTRACT() 함수 설명
+    
+     ㄱ. ASCII() 함수 설명
+     ㄴ. CHR() 함수 설명
+     ㄷ. GREATEST() 함수 설명
+     ㄹ. LEAST() 함수 설명
+     ㅁ. UPPER() 함수 설명
+     ㅂ. LOWER() 함수 설명
+     ㅅ. LENGTH() 함수 설명
+     ㅇ. SUBSTR() 함수 설명
+     ㅈ. INSTR() 함수 설명        
+     
+8.  TO_CHAR( date  ,  'format') 함수에서 'format'에 사용되는 기호를 적으세요.
+  ㄱ. 년도 : Y, YY, YYY, YYYY, IY, IYY, IYYY, IYYYY, YEAR, SYEAR, RR,RRRR
+  ㄴ. 월 : MM, MONTH, MON
+  ㄷ. 월의 일 :   DD
+      주의 일 :   D
+      년의 일 :   DDD
+  ㄹ. 요일 : DY, DAY
+  ㅁ. 월의 주차 : 
+      년의 주차 : 
+  ㅂ. 시간/24시간 : HH12, HH24, HH
+  ㅅ. 분 : MI
+  ㅇ. 초 : SS
+  ㅈ. 자정에서 지난 초 : SSSSS   00:00:00
+  ㅊ. 오전/오후 :      AM, PM
+
+9. 본인의 생일로부터 오늘까지 살아온 일수, 개월수, 년수를 출력하세요..     
+-- '1993.12.10'
+SELECT  CEIL(ABS(TO_DATE('1993.12.10') - SYSDATE)) -- 살아온 일수
+       , ROUND(MONTHS_BETWEEN(SYSDATE, TO_DATE('1993.12.10')), 2) -- 살아온 개월수
+       , ROUND(MONTHS_BETWEEN(SYSDATE, TO_DATE('1993.12.10'))/12, 2) -- 살아온 년수
+FROM dual;
+
+10. IW와 WW 의 차이점.   ( 기억 )
+월의 주차 : W
+SELECT SYSDATE
+   , TO_CHAR( SYSDATE, 'W')
+FROM dual;
+
+년의 주차 : WW, IW
+
+[박정호]
+IW : ISO기준 첫번째 목요일이 첫주의 시작 
+WW : SYSDATE기준 1월1일이 첫주의 시작
+*** [이동현] ***
+IW : 일요일에서 월요일로 넘어가면 다음 주차로 넘어간다.
+WW : 7일마다 다음 주차로 넘어간다
+2022.1.1 ~ 7  1주차
+     1.8~ 14  2주차
+
+  [2022.1]
+일월화수목금토
+          1
+2         8  
+9         15
+16        22
+23        29
+30 31
+;
+SELECT  TO_CHAR( TO_DATE('2022.1.1'), 'IW' ) -- 52주차
+     ,  TO_CHAR( TO_DATE('2022.1.1'), 'WW' ) -- 1주차
+     ,  TO_CHAR( TO_DATE('2022.1.2'), 'IW' ) -- 52주차
+     ,  TO_CHAR( TO_DATE('2022.1.2'), 'WW' ) -- 1주차
+     ,  TO_CHAR( TO_DATE('2022.1.3'), 'IW' ) -- 1주차
+     ,  TO_CHAR( TO_DATE('2022.1.3'), 'WW' ) -- 1주차
+     ,  TO_CHAR( TO_DATE('2022.1.8'), 'IW' ) -- 1주차
+     ,  TO_CHAR( TO_DATE('2022.1.8'), 'WW' ) -- 2주차
+FROM dual;
+
+11-1. 이번 달이 몇 일까지 있는 확인.
+SELECT SYSDATE
+    , LAST_DAY( SYSDATE )  -- 23/08/31
+    , TO_CHAR( LAST_DAY( SYSDATE ), 'DD') -- 31
+    
+    , ADD_MONTHS( SYSDATE, 1) -- 23/09/30
+--    , TRUNC(ADD_MONTHS( SYSDATE, 1), 'YEAR') -- 23/01/01
+--    , TRUNC(ADD_MONTHS( SYSDATE, 1), 'MONTH') -- 23/09/01
+    , TRUNC(ADD_MONTHS( SYSDATE, 1), 'MM')-1 -- 23/08/31
+FROM dual;
+
+-- ORA-01861: literal does not match format string
+SELECT  TO_DATE('2022', 'YYYY') -- 22/08/01
+      , TO_DATE('2022.02', 'YYYY.MM') -- 22/02/01
+      , TO_DATE('03', 'MM') -- 23/03/01
+FROM dual;
+
+3:03 수업시작~
+11-2. 오늘이 년중 몇 째 주, 월중 몇 째주인지 확인. 
+-- TO_CHAR()    W  IW  WW
+SELECT SYSDATE
+, TO_CHAR(SYSDATE, 'W')
+, TO_CHAR(SYSDATE, 'IW')
+, TO_CHAR(SYSDATE, 'WW')
+FROM dual;
+
+12. emp 에서  pay 를 NVL(), NVL2(), COALESCE()함수를 사용해서 출력하세요. NULLIF()
+SELECT ename
+   , sal + NVL(comm, 0) pay
+   , sal + NVL2(comm, comm,  0) pay
+   , COALESCE( sal + comm, sal,  0) pay
+FROM emp;
+
+12-2. emp테이블에서 mgr이 null 인 경우 -1 로 출력하는 쿼리 작성
+      ㄱ. nvl()
+      ㄴ. nvl2()
+      ㄷ. COALESCE()
+SELECT ename
+   ,   NVL(mgr, -1) pay
+   ,   NVL2(comm, comm,  -1) pay
+   ,   COALESCE( mgr, -1) pay
+FROM emp;
+
+13. insa 에서  이름,주민번호, 성별( 남자/여자 ), 성별( 남자/여자 ) 출력 쿼리 작성-
+    ㄱ. DECODE()
+    ㄴ. CASE()  안 배움. X
+    
+SELECT name, ssn
+   , MOD( SUBSTR(ssn, -7,1), 2 )
+   , DECODE( MOD( SUBSTR(ssn, -7,1), 2 ), 1, '남자', '여자'  ) gender
+--   , CASE 컬럼 또는 표현식
+--          WHEN 조건 THEN 값 
+--          WHEN 조건 THEN 값
+--           :
+--          ELSE   값
+--     END gender
+    , CASE MOD( SUBSTR(ssn, -7,1), 2 ) 
+         WHEN 1 THEN '남자'
+         --WHEN 0 THEN '여자'
+         ELSE         '여자'
+      END gender
+    , CASE
+           WHEN MOD( SUBSTR(ssn, -7,1), 2 )=1  THEN '남자'
+           ELSE '여자'
+      END gender
+FROM insa;
+-- DECODE()의 확장 -> CASE() 
+
+
+14. emp 에서 평균PAY 보다 같거나 큰 사원들만의 급여합을 출력.
+  ( DECODE 풀이 ) 
+-- 전체 사원들의 총 급여의 합 : \27,125
+SELECT TO_CHAR(SUM(sal + NVL(comm, 0)), 'L999,999'  ) pay
+FROM emp;
+-- 평균 급여(pay) : 2260.416666666666666666666666666666666667
+WITH 
+a AS (
+SELECT TO_CHAR( AVG(sal + NVL(comm, 0)), '9999.00' ) avg_pay  -- 2260.42
+FROM emp 
+) , 
+b AS (
+SELECT empno, ename, sal + NVL(comm, 0) pay
+FROM emp  
+)
+SELECT *
+FROM b , a    -- JOIN 수업 X 
+WHERE b.pay >= a.avg_pay;
+
+-- 18925
+SELECT SUM(t.pay)
+FROM (
+    SELECT empno, ename, sal + NVL(comm, 0) pay
+    FROM emp  
+    WHERE sal + NVL(comm, 0) >= (
+                                    SELECT   AVG(sal + NVL(comm, 0))  avg_pay  
+                                    FROM emp
+                                )
+ ) t;
+-- DECODE() 사용.
+-- CASE() 사용.
+-- ORA-00937: not a single-group group function
+-- 18925
+WITH temp AS (
+    SELECT empno, ename
+          , sal + NVL(comm, 0) pay
+          , (SELECT  AVG(sal + NVL(comm, 0)) FROM emp ) avg_pay
+    FROM emp
+)
+SELECT SUM(DECODE( SIGN( t.pay - t.avg_pay ), -1, null , t.pay  ))
+       , SUM(
+          CASE
+             WHEN (t.pay - t.avg_pay) >= 0  THEN t.pay
+             ELSE                                NULL
+          END
+       )
+FROM temp  t;
+
+15. emp 에서  사원이 존재하는 부서의 부서번호만 출력
+
+SELECT *
+FROM dept;
+
+10   ACCOUNTING   NEW YORK
+20   RESEARCH   DALLAS
+30   SALES   CHICAGO
+40   OPERATIONS   BOSTON 
+
+-- 모든 사원은 반드시 1개의 부서에 소속이다. 
+-- 신입사원이 부서발령 전엔 소속된 부서가 없을 수도 있다.
+-- 사원이 존재하는 부서의 부서번호 조회.
+-- 7839  신입사원(10)으로 수정.. 
+UPDATE emp
+SET deptno = null
+WHERE empno = 7839;
+ROLLBACK;
+SELECT DISTINCT deptno
+FROM emp
+ORDER BY deptno;
+
+15-2. emp 에서  사원이 존재하지 않는  부서의 부서번호만 출력
+10,20,30,[40]\
+
+-- [박정호][이상문]
+SELECT  d.deptno, d.dname
+FROM dept d 
+WHERE (SELECT COUNT(*) FROM emp WHERE deptno=d.deptno) !=0;
+               --사원 존재하는 부서
+WHERE (SELECT COUNT(*) FROM emp WHERE d.deptno=deptno) =0;
+               --사원 존재안하는 부서
+[유희진]
+SELECT deptno
+FROM dept
+MINUS
+SELECT DISTINCT deptno
+FROM emp;
+
+
+-- 조인(JOIN) --
+-- 예)  부서번호, 부서명 , 사원번호, 사원명, 입사일자 조회 ( emp )
+-- ORA-00904: "DNAME": invalid identifier
+SELECT deptno, dname,  empno, ename, hiredate
+FROM emp;
+
+-- ORA-00918: column ambiguously defined
+--           컬럼     모호하게      선언되었다.
+SELECT d.deptno, dname,  empno, ename, hiredate
+FROM emp e, dept d
+WHERE d.deptno = e.deptno; 
+-- JOIN ON 구문 수정
+SELECT d.deptno, dname,  empno, ename, hiredate
+FROM emp e JOIN dept d
+ON d.deptno = e.deptno;
+-- 
+
+
+DESC emp; -- emp 테이블에 dname 컬럼 X
+DESC dept; -- dname O
+ 
+-- 의문점  ?  애초에 테이블 생성
+-- empno, ename, job, hiredate~   deptno, dname, loc
+
+
+
+-- 5:02 수업 시작~ 
+-- 15, 15-2 풀이  조인 사용...
+-- ORA-00934: group function is not allowed here
+SELECT d.deptno, dname  --, COUNT(e.empno)
+FROM dept d LEFT OUTER JOIN emp e ON d.deptno = e.deptno
+-- WHERE COUNT(e.empno) = 0
+GROUP BY d.deptno, dname  
+HAVING COUNT(e.empno) = 0
+ORDER BY d.deptno;
+--
+SELECT deptno, COUNT(*)
+FROM emp
+GROUP BY deptno;
+
+X 40  0
+30   6
+20   3
+10   3
+
+SELECT buseo , jikwi,  COUNT(*)
+FROM insa
+GROUP BY buseo , jikwi 
+ORDER BY buseo , jikwi;
+
+16. 아래 코딩을  DECODE()를 사용해서 표현하세요.
+    ㄱ. [자바]
+        if( A == B ){
+           return X;
+        }
+    
+    ㄴ. [자바]
+        if( A==B){
+           return S;
+        }else if( A == C){
+           return T;
+        }else{
+           return U;
+        }
+    
+    ㄷ.  [자바]
+        if( A==B){
+           return XXX;
+        }else{
+           return YYY;
+        }
+
+17. emp 테이블에서 10번 부서원들은  급여 15% 인상
+                20번 부서원들은 급여 10% 인상
+                30번 부서원들은 급여 5% 인상
+                40번 부서원들은 급여 20% 인상
+  하는 쿼리 작성. 
+
+SELECT deptno, ename, sal + NVL(comm, 0)
+  , DECODE(deptno, 10, 15, 20, 10, 30, 5, 40, 20) || '%' "인상율"
+  , (sal + NVL(comm, 0)) * ( DECODE( deptno, 10, 0.15, 20, 0.1, 30, 0.05, 40, 0.2) )  "인상액"
+  , (sal + NVL(comm, 0)) * ( CASE  deptno
+                               WHEN 10 THEN 0.15
+                               WHEN 20 THEN 0.1
+                               WHEN 30 THEN 0.05
+                               WHEN 40 THEN 0.2
+                               -- ELSE
+                            END ) "인상액"
+FROM emp;
+  
+18. emp 테이블에서 각 부서의 사원수를 조회하는 쿼리
+  ( 힌트 :  DECODE, COUNT 함수 사용 )  
+  
+  
+  
+  
+  
+  
+  
