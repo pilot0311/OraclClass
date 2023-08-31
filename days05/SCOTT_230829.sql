@@ -197,8 +197,8 @@ SELECT SYSDATE  --23/08/29
 FROM dual;
 -- 년 중 몇번 째 주 ww,  월 중 몇번 째 주 w,  년 중 몇번 째 주 : iw
 SELECT SYSDATE
-    , TO_CHAR(SYSDATE, 'WW') --  35
-    , TO_CHAR(SYSDATE, 'IW') -- 35
+    , TO_CHAR(SYSDATE, 'WW') --  35 7일단위
+    , TO_CHAR(SYSDATE, 'IW') -- 35  요일 단위
     , TO_CHAR(SYSDATE, 'W') -- 5
 FROM dual;
 -- [2]ROUND(날짜,[형식]) : 일을 반올림할 때 정오를 넘으면 다음날 자정을 출력하고, 넘지 않 으면 그 날 자정을 출력한다. 
@@ -314,3 +314,5 @@ DECODE(x,10,C,D)
  SELECT e.*, DECODE(deptno,10,pay*1.15,20,pay*1.3,pay*1.05)인상급여, DECODE(deptno,10,pay*0.15,20,pay*0.3,pay*0.05)인상액
  FROM (SELECT deptno, ename, sal+NVl(comm,0)pay FROM emp)e;
  
+  
+ -- WW/W/IW차이   WW = 7일 기준 IW = 일~월 기준 
