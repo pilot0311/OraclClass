@@ -209,7 +209,19 @@ SELECT dbms_random.value
 30	ALLEN/BLAKE/JAMES/MARTIN/TURNER/WARD
 40  사원없음    
 
-SELECT deptno
-     , LISTAGG( ename , '/') WITHIN GROUP ( ORDER BY ename )  as enames    
+SELECT d.deptno
+     , LISTAGG( NVL(ename,'사원없음') , '/') WITHIN GROUP ( ORDER BY ename )AS ename    
+FROM emp e RIGHT JOIN dept d ON e.deptno = d.deptno
+GROUP BY d.deptno;
+
+13.  emp 테이블에서 30번인 부서의 최고, 최저 SAL을 출력하는 쿼리 작성.
+SELECT MAX(sal),MIN(sal)
 FROM emp
-GROUP BY deptno; 
+WHERE deptno = 30;
+
+13-2. emp 테이블에서 30번인 부서의 최고, 최저 SAL를 받는 사원의 정보 출력하는 쿼리 작성.
+SELECT *
+FROM emp
+WHERE sal IN ((SELECT MAX(sal)FROM emp WHERE deptno = 30),(SELECT MIN(sal)FROM emp WHERE deptno = 30)) 
+
+14. emp 테이블에서 사원수가 가장작은 부서명과 사원수, 가장 많은 부서명과 사원수 출력
